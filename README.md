@@ -23,7 +23,7 @@ Requires python3
 This tool only supports two simple operations `sweep` and `send`
 
 Both commands are similar in that they prompt the user for the transaction details (most importantly the WIF private key from the paper wallet)
-and return raw hexadecimal transaction hex that can be pushed to the blockchain [here](https://www.blockchain.com/btc/pushtx)
+and return raw hexadecimal transaction hex that can be pushed to the blockchain (e.g. [here](https://www.blockchain.com/btc/pushtx))
 
 **Sweep**
 
@@ -35,7 +35,7 @@ run this command with:
 
 you will be prompted for the receiving address and your private key (WIF format)
 
-on success the script returns raw hexadecimal bytes of your signed transaction.
+on success the script returns raw hexadecimal bytes of your signed transaction
 
 
 **Send**
@@ -44,10 +44,12 @@ Send allows you to send a specific amount from your paper wallet. This is not us
 
 run this command with:
 
-`python 3 paperwallet.py send`
+`python3 paperwallet.py send`
 
 you will be prompted for 
 - receiving address
 - amount to send in BTC (i.e. 0.5)
 - private key (WIF format)
 - change address (where leftover transaction outputs get sent)
+
+on success the script returns raw hexadecimal bytes of your signed transaction
