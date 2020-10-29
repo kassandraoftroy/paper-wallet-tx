@@ -1,8 +1,8 @@
 # paper-wallet-tx
 
-Bitcoin paper wallets and brain wallets are no longer recommended for use by the bitcoin community for a number of reasons ([see here](https://www.coindesk.com/brainwallet-bitcoin-wallet-shouldnt-use))
+Bitcoin paper wallets and brain wallets are no longer recommended for use by the bitcoin community for a number of reasons ([see here](https://en.bitcoin.it/wiki/Address_reuse) or [here](https://www.coindesk.com/brainwallet-bitcoin-wallet-shouldnt-use))
 
-However, there are certain situations where a brain wallet still may be convenient, as well as legacy paper/brain wallets that need to be managed or swept into a modern wallet client.
+However, there are certain situations where a brain wallet still may be convenient, as well as legacy paper/brain wallets that still need to be managed or swept into a modern wallet client.
 
 This is a tool to help those bitcoin paper wallets that currently exist to move their bitcoins with a simple python script.
 
