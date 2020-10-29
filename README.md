@@ -1,6 +1,6 @@
 # paper-wallet-tx
 
-Bitcoin paper wallets and brain wallets are no longer recommended for use by the bitcoin community for a number of reasons. 
+Bitcoin paper wallets and brain wallets are no longer recommended for use by the bitcoin community for a number of reasons ([see here](https://www.coindesk.com/brainwallet-bitcoin-wallet-shouldnt-use))
 
 However, there are certain situations where a brain wallet still may be convenient, as well as legacy paper/brain wallets that need to be managed or swept into a modern wallet client.
 
@@ -21,6 +21,9 @@ Requires python3
 ## Usage
 
 This tool only supports two simple operations `sweep` and `send`
+
+Both commands are similar in that they prompt the user for the transaction details (most importantly the WIF private key from the paper wallet)
+and return raw hexadecimal transaction hex that can be pushed to the blockchain [here](https://www.blockchain.com/btc/pushtx)
 
 **Sweep**
 
