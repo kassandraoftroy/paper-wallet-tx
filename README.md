@@ -1,8 +1,8 @@
 # paper-wallet-tx
 
-Bitcoin paper wallets are no longer recommended for use by the bitcoin community for a number of reasons. 
+Bitcoin paper wallets and brain wallets are no longer recommended for use by the bitcoin community for a number of reasons. 
 
-However, there are certain situations where a paper wallet still may be convenient, as well as legacy paper wallets that need to be managed/swept until they switch over to more modern wallets.
+However, there are certain situations where a brain wallet still may be convenient, as well as legacy paper/brain wallets that need to be managed or swept into a modern wallet client.
 
 This is a tool to help those bitcoin paper wallets that currently exist to move their bitcoins with a simple python script.
 
