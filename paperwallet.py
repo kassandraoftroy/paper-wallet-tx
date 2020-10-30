@@ -3,7 +3,7 @@
 Hyper simple helper tool for spending from a bitcoin paper wallet
 IMPORTANT: only supports P2PKH transactions (send/receive to bitcoin addresses that start with a "1")
 
-original implementation: superarius
+implemented by: superarius
 see MIT License in root directory of https://github.com/superarius/paper-wallet-tx
 '''
 
@@ -12,11 +12,10 @@ from cryptos import b58check_to_hex
 from ecdsa import SigningKey, SECP256k1
 
 from bitcoin import SelectParams
-from bitcoin.core import b2x, lx, COutPoint, CMutableTxOut, CMutableTxIn, CMutableTransaction, Hash160, COIN
-from bitcoin.core.script import CScript, OP_DUP, OP_HASH160, OP_EQUALVERIFY, OP_CHECKSIG, SignatureHash, SIGHASH_ALL
+from bitcoin.core import b2x, lx, COutPoint, CMutableTxOut, CMutableTxIn, CMutableTransaction, COIN
 from bitcoin.wallet import CBitcoinAddress, CBitcoinSecret, P2PKHBitcoinAddress
 
-def simple_transaction(sender_priv, receiver_address, amount_btc, testnet=False, change_address=None, fee_type='high', sat_per_byte=None):
+def simple_transaction(sender_priv, receiver_address, amount_btc, testnet=False, change_address=None, fee_type='standard', sat_per_byte=None):
 	amount = int(amount_btc*COIN)
 	secret = CBitcoinSecret(sender_priv)
 	sender = f"{P2PKHBitcoinAddress.from_pubkey(secret.pub)}"
@@ -41,7 +40,7 @@ def simple_transaction(sender_priv, receiver_address, amount_btc, testnet=False,
 	unsigned = unsigned_transaction(inputs, [{"value": amount, "address": receiver_address}], sat_fee, change_address, testnet=testnet)
 	return sign_tx(sender_priv, unsigned)
 
-def simple_send_all(sender_priv, receiver_address, testnet=False, fee_type='high', sat_per_byte=None):
+def simple_send_all(sender_priv, receiver_address, testnet=False, fee_type='standard', sat_per_byte=None):
 	secret = CBitcoinSecret(sender_priv)
 	sender = f"{P2PKHBitcoinAddress.from_pubkey(secret.pub)}"
 	utxos = get_unspent(sender, testnet=testnet)
@@ -61,12 +60,12 @@ def simple_send_all(sender_priv, receiver_address, testnet=False, fee_type='high
 def unsigned_transaction(inputs, outputs, satoshi_fee, change_address, testnet=False):
 	"""
 	Generate the **unsigned** transaction hex code
-	:param addresses: list of bitcoin addresses that are being spent
-	:param outputs: [{"address": address, "value" : value},]
+	:param inputs: a list of utxos [{"value": value, "index": index, "txid":txid}]
+	:param outputs: [{"address": address, "value" : value},...]
 	:param satoshi_fee: transaction fee in satoshi
 	:param change_address: remaining change return address
 	:param testnet: flag to enable/disable mainnet vs testnet
-	:return: transaction_hex, [list_of_addresses]
+	:return: unsigned transaction hex
 	"""
 	if testnet:
 		SelectParams('testnet')
@@ -86,6 +85,12 @@ def unsigned_transaction(inputs, outputs, satoshi_fee, change_address, testnet=F
 	return b2x(tx.serialize())
 
 def sign_tx(private_key, hex_data):
+	'''
+	sign transaction inputs with private key (assumes this key unlocks all inputs)
+	:param private_key: WIF base58 private key
+	:param hex_data: unsigned transaction hex
+	:return: signed transaction hex
+	'''
 	secret = CBitcoinSecret(private_key)
 	pubkey = binascii.hexlify(secret.pub).decode('utf-8')
 	public_address = f"{P2PKHBitcoinAddress.from_pubkey(secret.pub)}"
@@ -172,22 +177,38 @@ def get_unspent(address, testnet=False):
 	clean_utxos = [{'value': i['value'], 'index': i['tx_output_n'], 'txid': i['tx_hash']} for i in utxos]
 	return clean_utxos
 
-def get_current_fee(type_='medium'):
-	req = "https://api.blockcypher.com/v1/btc/main"
-	try:
-		resp = requests.get(req)
-		response = resp.json()
-	except:
-		time.sleep(2)
-		resp = requests.get(req)
-		response = resp.json()
-	if type_=='high':
-		fee_kb = response['high_fee_per_kb']
-	elif type_=='low':
-		fee_kb = response['low_fee_per_kb']
+def get_current_fee(type_='standard'):
+	'''
+	Calculate transaction fees based on current network activity
+	:param type_: specify the type of fee ('fast', 'standard', 'hour', 'cheap')
+	'''
+	if type_ == 'cheap':
+		req = "https://api.blockcypher.com/v1/btc/main"
+		try:
+			resp = requests.get(req)
+			response = resp.json()
+		except:
+			time.sleep(2)
+			resp = requests.get(req)
+			response = resp.json()
+		return int(response['medium_fee_per_kb']/1000)
 	else:
-		fee_kb = response['medium_fee_per_kb']
-	return int(fee_kb/1000)
+		req = "https://mempool.space/api/v1/fees/recommended"
+		try:
+			resp = requests.get(req)
+			response = resp.json()
+		except:
+			time.sleep(2)
+			resp = requests.get(req)
+			response = resp.json()
+		if type_ == 'fast':
+			return int(response["fastestFee"])
+		elif type_ == 'standard':
+			return int(response["halfHourFee"])
+		elif type_ == 'hour':
+			return int(response["hourFee"])
+		else:
+			raise ValueError("Fee type %s not in ('fast', 'standard', 'hour', 'cheap')" % type_)
 
 
 def push_transaction(transaction, testnet=False):
