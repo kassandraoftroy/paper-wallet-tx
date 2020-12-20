@@ -16,7 +16,7 @@ Requires python3
 
 2. Enter the root directory ( `cd paper-wallet-tx` )
 
-3. Install dependencies with `pip3 install requirements.txt`
+3. Install dependencies with `pip3 install -r requirements.txt`
 
 ## Usage
 
